@@ -2,7 +2,9 @@
 # The Embedded Template Library (https://www.etlcpp.com/)
 #######################################################################
 cmake_minimum_required(VERSION 3.5.0)
+if(!CONFIG_ETL)
 project(etl)
+endif() # CONFIG_ETL
 
 #######################################################################
 # Define an option to allow consumers of the library to 
@@ -13,6 +15,9 @@ project(etl)
 set(ETL_PROFILE "DEFAULT" CACHE STRING "Defines what profile header to include.  See https://www.etlcpp.com/setup.html"
 )
 
+if(CONFIG_ETL)
+zephyr_include_directories(include include/etl/profiles)
+else() # CONFIG_ETL
 option(BUILD_TESTS "Build unit tests" OFF)
 
 add_library(etl INTERFACE)
@@ -22,6 +27,7 @@ target_include_directories(etl
   include
   include/etl/profiles
   )
+endif() # CONFIG_ETL
 
 if (${ETL_PROFILE} STREQUAL DEFAULT)
   if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -49,6 +55,10 @@ endif()
 
 message(STATUS "Compiling with ETL profile set to: ${ETL_PROFILE}")
 
+if(CONFIG_ETL)
+zephyr_compile_definitions(${ETL_PROFILE})
+else() # CONFIG_ETL
+
 target_compile_definitions(etl
   INTERFACE
   ${ETL_PROFILE} 
@@ -60,3 +70,5 @@ if (BUILD_TESTS)
   enable_testing()
   add_subdirectory(test) 
 endif()
+
+endif() # CONFIG_ETL
